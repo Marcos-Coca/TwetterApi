@@ -14,7 +14,7 @@ namespace TwetterApi.Models.Repositories
         private IDbContext _dbContext;
         public TweetRepository(IDbContext dbContext)
         {
-            this._dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         public Tweet GetTweet(int id)
@@ -22,7 +22,7 @@ namespace TwetterApi.Models.Repositories
             string query = "SELECT t.*,u.name,u.user_name,u.photo_url " +
                            "FROM tweet as t JOIN [user] as u ON u.id = t.user_id WHERE t.id = @id";
 
-            Tweet tweet = new Tweet();
+            Tweet tweet = null;
 
             using (var connection = _dbContext.Connect())
             {
@@ -34,7 +34,7 @@ namespace TwetterApi.Models.Repositories
 
                 while (reader.Read())
                 {
-                    tweet = SetTweet(reader);
+                    tweet = DataAdapter.AdaptTweet(reader);
                 }
 
                 connection.Close();
@@ -48,30 +48,5 @@ namespace TwetterApi.Models.Repositories
             throw new NotImplementedException();
         }
 
-        private static Tweet SetTweet(SqlDataReader reader)
-        {
-            return new Tweet()
-            {
-                Id = (int)reader["id"],
-                Content = (string)reader["content"],
-                Type = (Entities.Type)reader["type"],
-                Visibitity = (Visibility)reader["visibility"],
-                Media = (Media)reader["media"],
-                CreatedAt = (DateTime)reader["created_at"],
-                UpdatedAt = (DateTime)reader["updated_at"],
-                User = new User()
-                {
-                    Id = (int)reader["user_id"],
-                    Name = (string)reader["name"],
-                    UserName = (string)reader["user_name"],
-                    PhotoUrl = (string)reader["photo_url"],
-                    HeaderUrl = (string)reader["header_url"],
-                    Biography = (string)reader["biography"],
-                    Password = (string)reader["password"],
-                    BirthDate = (DateTime)reader["email"],
-                    Email = (string)reader["email"]
-                }
-            };
-        }
     }
 }

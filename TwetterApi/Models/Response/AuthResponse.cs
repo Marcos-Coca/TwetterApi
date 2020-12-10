@@ -22,6 +22,7 @@ namespace TwetterApi.Models.Response
             Id = user.Id;
             Name = user.Name;
             UserName = user.UserName;
+            PhotoUrl = user.PhotoUrl;
             JwtToken = jwtToken;
             RefreshToken = refreshToken;
         }

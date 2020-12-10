@@ -50,6 +50,7 @@ namespace TwetterApi
             services.AddScoped<IDbContext, TweeterContext>();
             services.AddScoped<ITweetRepository, TweetRepository>();
             services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddScoped<ITweetService, TweetService>();
             services.AddScoped<IAuthService, AuthService>();
 

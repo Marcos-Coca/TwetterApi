@@ -7,9 +7,9 @@ using TwetterApi.Entities;
 
 namespace TwetterApi.Models.Repositories
 {
-    public interface IUserRepository
+    public interface ITokenRepository
     {
-        User GetUser(int id);
-        User GetUserByEmail(string email);
+        void SaveRefreshToken(RefreshToken token);
+        RefreshToken GetRefreshToken(string token);
     }
 }

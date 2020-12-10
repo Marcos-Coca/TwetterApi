@@ -18,11 +18,13 @@ namespace TwetterApi.Services
 {
     public class AuthService : IAuthService
     {
-        private  IUserRepository _userRepository;
+        private IUserRepository _userRepository;
+        private ITokenRepository _tokenRepository;
         private readonly TokenOptions _tokenOptions;
-        public AuthService(IUserRepository userRepository,IOptions<TokenOptions> tokenOptions)
+        public AuthService(IUserRepository userRepository, IOptions<TokenOptions> tokenOptions, ITokenRepository tokenRepository)
         {
             _userRepository = userRepository;
+            _tokenRepository = tokenRepository;
             _tokenOptions = tokenOptions.Value;
         }
         public AuthResponse Login(LoginRequest model, string ipAddress)
@@ -33,16 +35,31 @@ namespace TwetterApi.Services
                 return null;
 
             var jwtToken = generateJwtToken(user);
-            var refreshToken = generateRefreshToken(ipAddress,user);
+            var refreshToken = generateRefreshToken(ipAddress, user);
 
-            _userRepository.SaveRefreshToken(refreshToken);
+            _tokenRepository.SaveRefreshToken(refreshToken);
 
-            return new AuthResponse(user, jwtToken, refreshToken.Token); 
+            return new AuthResponse(user, jwtToken, refreshToken.Token);
         }
 
         public AuthResponse RefreshToken(string token, string ipAddress)
         {
-            throw new NotImplementedException();
+            RefreshToken refreshToken = _tokenRepository.GetRefreshToken(token);
+
+            if (refreshToken == null) return null;
+
+            if (!refreshToken.IsActive) return null;
+
+            var newRefreshToken = generateRefreshToken(ipAddress,refreshToken.User);
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+            _tokenRepository.SaveRefreshToken(newRefreshToken);
+
+            var jwtToken = generateJwtToken(refreshToken.User);
+
+            return new AuthResponse(refreshToken.User, jwtToken, newRefreshToken.Token);
         }
 
         public AuthResponse Register(RegisterRequest userRequest, string ipAddress)
@@ -73,7 +90,7 @@ namespace TwetterApi.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-        private RefreshToken generateRefreshToken(string ipAddress,User user)
+        private RefreshToken generateRefreshToken(string ipAddress, User user)
         {
             using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[64];
