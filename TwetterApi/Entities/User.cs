@@ -17,7 +17,6 @@ namespace TwetterApi.Entities
         [JsonIgnore]
         public string Password;
         [JsonIgnore]
-        public List<RefreshToken> RefreshTokens { get; set; }
         public string PhotoUrl;
         public string Biography;
         public string HeaderUrl;

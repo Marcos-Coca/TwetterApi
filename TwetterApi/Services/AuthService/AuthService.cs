@@ -55,7 +55,9 @@ namespace TwetterApi.Services
             refreshToken.RevokedByIp = ipAddress;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
 
+            _tokenRepository.UpdateRefreshToken(refreshToken);
             _tokenRepository.SaveRefreshToken(newRefreshToken);
+            
 
             var jwtToken = generateJwtToken(refreshToken.User);
 
@@ -64,12 +66,40 @@ namespace TwetterApi.Services
 
         public AuthResponse Register(RegisterRequest userRequest, string ipAddress)
         {
-            throw new NotImplementedException();
+            User user = new User()
+            {
+                Name = userRequest.Name,
+                UserName = userRequest.UserName,
+                Email = userRequest.Email,
+                Password = userRequest.Password,
+                BirthDate = userRequest.BirthDate,
+            };
+
+            _userRepository.CreateUser(user);
+            var createdUser = _userRepository.GetUserByEmail(user.Email);
+
+            var jwtToken = generateJwtToken(createdUser);
+            var refreshToken = generateRefreshToken(ipAddress, user);
+
+            _tokenRepository.SaveRefreshToken(refreshToken);
+
+            return new AuthResponse(createdUser, jwtToken, refreshToken.Token);
         }
 
         public bool RevokeToken(string token, string ipAddress)
         {
-            throw new NotImplementedException();
+            RefreshToken refreshToken = _tokenRepository.GetRefreshToken(token);
+
+            if (refreshToken == null) return false;
+
+            if (!refreshToken.IsActive) return false;
+
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+
+            _tokenRepository.UpdateRefreshToken(refreshToken);
+
+            return true;
         }
 
         //helper methods

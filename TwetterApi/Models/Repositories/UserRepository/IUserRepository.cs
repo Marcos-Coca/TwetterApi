@@ -11,5 +11,6 @@ namespace TwetterApi.Models.Repositories
     {
         User GetUser(int id);
         User GetUserByEmail(string email);
+        void CreateUser(User user);
     }
 }

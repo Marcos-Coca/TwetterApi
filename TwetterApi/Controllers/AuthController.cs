@@ -13,7 +13,7 @@ namespace TwetterApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private IAuthService _authService;
+        private readonly IAuthService _authService;
         public AuthController(IAuthService authService)
         {
             _authService = authService;
@@ -31,6 +31,49 @@ namespace TwetterApi.Controllers
 
             return Ok(response);
            
+        }
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterRequest model)
+        {
+            var response = _authService.Register(model, ipAddress());
+
+            setTokenCookie(response.RefreshToken);
+
+            return Ok(response);
+        }
+
+        [HttpPost("refresh-token")]
+        public IActionResult RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            var response = _authService.RefreshToken(refreshToken, ipAddress());
+
+            if (response == null)
+                return Unauthorized(new { message = "Invalid token" });
+
+            setTokenCookie(response.RefreshToken);
+
+            return Ok(response);
+        }
+
+
+        [HttpPost("revoke-token")]
+
+        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        {
+            //Accept token from request body or cookie
+
+            var token = model.Token ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+                return BadRequest(new { message = "Token is required" });
+
+            var response = _authService.RevokeToken(token, ipAddress());
+
+            if (!response)
+                return NotFound(new { message = "Token not found" });
+
+            return Ok(new { message = "Token revoked" });
         }
 
         //helper methods
