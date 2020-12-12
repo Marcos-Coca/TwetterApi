@@ -12,5 +12,6 @@ namespace TwetterApi.Models.Repositories
         void SaveRefreshToken(RefreshToken token);
         RefreshToken GetRefreshToken(string token);
         void UpdateRefreshToken(RefreshToken token);
+        IEnumerable<RefreshToken> GetUserRefreshTokens(int userId);
     }
 }

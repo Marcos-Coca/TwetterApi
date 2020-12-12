@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TwetterApi.Entities;
 using TwetterApi.Models.Request;
-using TwetterApi.Models.Common;
+using TwetterApi.Models.Options;
 using TwetterApi.Models.Response;
 using TwetterApi.Models.Repositories;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,8 +18,8 @@ namespace TwetterApi.Services
 {
     public class AuthService : IAuthService
     {
-        private IUserRepository _userRepository;
-        private ITokenRepository _tokenRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ITokenRepository _tokenRepository;
         private readonly TokenOptions _tokenOptions;
         public AuthService(IUserRepository userRepository, IOptions<TokenOptions> tokenOptions, ITokenRepository tokenRepository)
         {
@@ -34,15 +34,15 @@ namespace TwetterApi.Services
             if (user == null || user.Password != model.Password)
                 return null;
 
-            var jwtToken = generateJwtToken(user);
-            var refreshToken = generateRefreshToken(ipAddress, user);
+            var jwtToken = GenerateJwtToken(user.Id);
+            var refreshToken = GenerateRefreshToken(ipAddress, user.Id);
 
             _tokenRepository.SaveRefreshToken(refreshToken);
 
             return new AuthResponse(user, jwtToken, refreshToken.Token);
         }
 
-        public AuthResponse RefreshToken(string token, string ipAddress)
+        public RefreshResponse RefreshToken(string token, string ipAddress)
         {
             RefreshToken refreshToken = _tokenRepository.GetRefreshToken(token);
 
@@ -50,7 +50,7 @@ namespace TwetterApi.Services
 
             if (!refreshToken.IsActive) return null;
 
-            var newRefreshToken = generateRefreshToken(ipAddress,refreshToken.User);
+            var newRefreshToken = GenerateRefreshToken(ipAddress,refreshToken.UserId);
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
@@ -59,9 +59,9 @@ namespace TwetterApi.Services
             _tokenRepository.SaveRefreshToken(newRefreshToken);
             
 
-            var jwtToken = generateJwtToken(refreshToken.User);
+            var jwtToken = GenerateJwtToken(refreshToken.UserId);
 
-            return new AuthResponse(refreshToken.User, jwtToken, newRefreshToken.Token);
+            return new RefreshResponse(refreshToken.Token, jwtToken);
         }
 
         public AuthResponse Register(RegisterRequest userRequest, string ipAddress)
@@ -78,8 +78,8 @@ namespace TwetterApi.Services
             _userRepository.CreateUser(user);
             var createdUser = _userRepository.GetUserByEmail(user.Email);
 
-            var jwtToken = generateJwtToken(createdUser);
-            var refreshToken = generateRefreshToken(ipAddress, user);
+            var jwtToken = GenerateJwtToken(createdUser.Id);
+            var refreshToken = GenerateRefreshToken(ipAddress, createdUser.Id);
 
             _tokenRepository.SaveRefreshToken(refreshToken);
 
@@ -102,9 +102,16 @@ namespace TwetterApi.Services
             return true;
         }
 
-        //helper methods
+        public IEnumerable<RefreshToken> GetUserRefreshTokens(int userId)
+        {
+             return _tokenRepository.GetUserRefreshTokens(userId);
+        }
 
-        private string generateJwtToken(User user)
+
+
+        #region Private methods
+
+        private string GenerateJwtToken(int userId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_tokenOptions.JwtTokenSecret);
@@ -112,7 +119,7 @@ namespace TwetterApi.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name,user.Id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier,userId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -120,7 +127,7 @@ namespace TwetterApi.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-        private RefreshToken generateRefreshToken(string ipAddress, User user)
+        private static RefreshToken GenerateRefreshToken(string ipAddress, int userId)
         {
             using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[64];
@@ -131,8 +138,9 @@ namespace TwetterApi.Services
                 Expires = DateTime.UtcNow.AddDays(7),
                 CreatedAt = DateTime.UtcNow,
                 CreatedByIp = ipAddress,
-                User = user
+                UserId = userId
             };
         }
+        #endregion
     }
 }

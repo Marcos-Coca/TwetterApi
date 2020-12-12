@@ -20,6 +20,7 @@ namespace TwetterApi.Entities
         public string? RevokedByIp { get; set; }
         public string? ReplacedByToken { get; set; }
         public bool IsActive => Revoked == null && !IsExpired;
-        public User User { get; set; }
+        [JsonIgnore]
+        public int UserId { get; set; }
     }
 }

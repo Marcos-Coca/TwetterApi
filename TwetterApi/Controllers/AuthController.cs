@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using TwetterApi.Models.Request;
 using TwetterApi.Services;
 
@@ -56,14 +58,14 @@ namespace TwetterApi.Controllers
             return Ok(response);
         }
 
-
+        [Authorize]
         [HttpPost("revoke-token")]
 
         public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
         {
             //Accept token from request body or cookie
 
-            var token = model.Token ?? Request.Cookies["refreshToken"];
+            var token = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(token))
                 return BadRequest(new { message = "Token is required" });
@@ -74,6 +76,17 @@ namespace TwetterApi.Controllers
                 return NotFound(new { message = "Token not found" });
 
             return Ok(new { message = "Token revoked" });
+        }
+        [Authorize]
+        [HttpGet("refresh-tokens")]
+        public IActionResult GetRefreshTokens()
+        {
+            int userId = int.Parse(getUserId());
+            var refreshTokens = _authService.GetUserRefreshTokens(userId);
+
+            if (refreshTokens == null) return NotFound();
+
+            return Ok(refreshTokens);
         }
 
         //helper methods
@@ -86,6 +99,11 @@ namespace TwetterApi.Controllers
                 Expires = DateTime.UtcNow.AddDays(7)
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
+        }
+
+        public string getUserId()
+        {
+           return User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
         private string ipAddress()

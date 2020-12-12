@@ -32,7 +32,9 @@ namespace TwetterApi.Entities
         public Media Media { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public User User { get; set; }
-        public string? MediaUrl { get; set; }
+        public int UserId { get; set; }
+        public string Name { get; set; }
+        public string UserName { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

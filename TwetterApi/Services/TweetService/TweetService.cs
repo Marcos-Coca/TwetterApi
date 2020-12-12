@@ -39,14 +39,7 @@ namespace TwetterApi.Services
                 Content = tweet.Content,
                 Type = tweet.Type,
                 CreatedAt = tweet.CreatedAt,
-                UpdatedAt = tweet.UpdatedAt,
-                User = new TweetUserResponse()
-                {
-                    Id = tweet.User.Id,
-                    Name = tweet.User.Name,
-                    UserName = tweet.User.UserName,
-                    PhotoUrl = tweet.User.PhotoUrl
-                }
+                UpdatedAt = tweet.UpdatedAt
             };
         }
     }

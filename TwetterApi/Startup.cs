@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TwetterApi.Models.Common;
+using TwetterApi.Models.Options;
 using TwetterApi.Models.DBContext;
 using TwetterApi.Models.Repositories;
 using TwetterApi.Services;
@@ -45,7 +45,7 @@ namespace TwetterApi
             var tokenOptionsSection = Configuration.GetSection(TokenOptions.Token);
             services.Configure<TokenOptions>(tokenOptionsSection);
 
-            // Dependecy Inversion
+            // Dependecy Injection
 
             services.AddScoped<IDbContext, TweeterContext>();
             services.AddScoped<ITweetRepository, TweetRepository>();
@@ -95,6 +95,7 @@ namespace TwetterApi
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
