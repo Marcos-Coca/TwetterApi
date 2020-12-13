@@ -19,7 +19,6 @@ namespace TwetterApi.Models.Repositories
 
         public Tweet GetTweet(int id)
         {
-
             Tweet tweet = null;
 
             using var connection = _dbContext.Connect();
@@ -33,6 +32,9 @@ namespace TwetterApi.Models.Repositories
             while (reader.Read())
             {
                 tweet = ReadTweet(reader);
+
+                if (tweet.Media == Media.Yes)
+                    tweet.PhotosUrl = GetTweetPhotos(tweet.Id);
             }
 
             connection.Close();
@@ -44,11 +46,25 @@ namespace TwetterApi.Models.Repositories
         {
             throw new NotImplementedException();
         }
+        public IEnumerable<Tweet> GetUserAllTweets()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Tweet> GetUserPublicsTweets()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Tweet> GetUserPostTweets()
+        {
+            throw new NotImplementedException();
+        }
+
 
         #region Private methods
 
         #region SQL commands
-
         private static SqlCommand SQL_GET_TWEET(int tweetId)
         {
             string query = "SELECT *,u.id as user_id " +
@@ -60,24 +76,60 @@ namespace TwetterApi.Models.Repositories
             return command;
         }
 
+        private static SqlCommand SQL_GET_TWEET_PHOTOS(int tweetId)
+        {
+            string query = "SELECT * FROM tweet_photo WHERE tweet_id = @id";
+
+            var command = new SqlCommand(query);
+            command.Parameters.AddWithValue("@id", tweetId);
+
+            return command;
+        }
+
         #endregion
+        private List<string> GetTweetPhotos(int tweetId)
+        {
+
+            List<string> photosUrls = new List<string>();
+
+            using var connection = _dbContext.Connect();
+            using var command = SQL_GET_TWEET_PHOTOS(tweetId);
+
+            command.Connection = connection;
+            connection.Open();
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                string url = Convert.ToString(reader["url"]);
+                photosUrls.Add(url);
+            }
+            connection.Close();
+
+            return photosUrls;
+        }
 
         private static Tweet ReadTweet(SqlDataReader reader) => new Tweet
         {
             Id = (int)(reader["id"]),
-            Media = (Media)reader["media"],
-            Visibitity = (Visibility)reader["visibility"],
-            Type = (Entities.Type)reader["type"],
+            Media = (Media)Convert.ToInt32(reader["media"]),
+            Visibitity = (Visibility)Convert.ToInt32(reader["visibility"]),
+            Type = (Entities.Type)Convert.ToInt32(reader["type"]),
             CreatedAt = (DateTime)reader["created_at"],
             UpdatedAt = (DateTime)reader["updated_at"],
+            PhotosUrl = new List<string>(),
             UserId = (int)reader["user_id"],
             Name = (string)reader["name"],
             UserName = (string)reader["user_name"],
             Content = Common.IsDBNull(reader["content"]) ? string.Empty : (string)reader["content"],
-            PhotoUrl = Common.IsDBNull(reader["photo_url"]) ? string.Empty : (string)reader["photo_url"]
+            PhotoUrl = Common.IsDBNull(reader["photo_url"]) ? string.Empty : (string)reader["photo_url"],
         };
 
+        public IEnumerable<Tweet> GetUserTweets()
+        {
+            throw new NotImplementedException();
+        }
         #endregion
-
     }
 }

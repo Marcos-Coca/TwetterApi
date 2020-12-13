@@ -32,7 +32,6 @@ namespace TwetterApi.Controllers
             setTokenCookie(response.RefreshToken);
 
             return Ok(response);
-           
         }
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest model)
@@ -61,7 +60,7 @@ namespace TwetterApi.Controllers
         [Authorize]
         [HttpPost("revoke-token")]
 
-        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        public IActionResult RevokeToken()
         {
             //Accept token from request body or cookie
 
@@ -74,6 +73,8 @@ namespace TwetterApi.Controllers
 
             if (!response)
                 return NotFound(new { message = "Token not found" });
+
+            Response.Cookies.Delete("refreshToken");
 
             return Ok(new { message = "Token revoked" });
         }

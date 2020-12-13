@@ -34,6 +34,8 @@ namespace TwetterApi.Controllers
         {
             var tweet = _tweetService.GetTweet(tweetId);
 
+            if (tweet == null) return NotFound();
+
             return Ok(tweet);
         }
 

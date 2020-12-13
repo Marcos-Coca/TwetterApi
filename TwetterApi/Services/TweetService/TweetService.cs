@@ -11,36 +11,25 @@ namespace TwetterApi.Services
 {
     public class TweetService : ITweetService
     {
-        private ITweetRepository _tweetRepository;
+        private readonly ITweetRepository _tweetRepository;
 
         public TweetService(ITweetRepository tweetRepository)
         {
-            this._tweetRepository = tweetRepository;
+            _tweetRepository = tweetRepository;
 
         }
 
         public TweetReponse GetTweet(int id)
         {
             Tweet tweet = _tweetRepository.GetTweet(id);
-            return SetTweetResponse(tweet);
+            if (tweet == null) return null;
+            return new TweetReponse(tweet);
         }
 
         public List<TweetReponse> GetTweets()
         {
             List<Tweet> tweets = _tweetRepository.GetTweets();
-            return (List<TweetReponse>)tweets.Select(tweet => SetTweetResponse(tweet));
-        }
-
-        private static TweetReponse SetTweetResponse(Tweet tweet)
-        {
-            return new TweetReponse()
-            {
-                Id = tweet.Id,
-                Content = tweet.Content,
-                Type = tweet.Type,
-                CreatedAt = tweet.CreatedAt,
-                UpdatedAt = tweet.UpdatedAt
-            };
+           return (List<TweetReponse>)tweets.Select(tweet => new TweetReponse(tweet));
         }
     }
 }
