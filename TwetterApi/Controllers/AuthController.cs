@@ -2,12 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using TwetterApi.Models.Request;
-using TwetterApi.Services;
+using TwetterApi.Domain.Models.Request;
+using TwetterApi.Domain.Models.Response;
+using TwetterApi.Application.AuthService;
 
 namespace TwetterApi.Controllers
 {
@@ -24,75 +21,72 @@ namespace TwetterApi.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest model)
         {
-            var response = _authService.Login(model,ipAddress());
+            AuthResponse authResponse = _authService.Login(model,IpAddress());
 
-            if (response == null)
-                return BadRequest();
+            if (authResponse == null)
+            {
+                return BadRequest("Invalid Email or Password");
+            }
 
-            setTokenCookie(response.RefreshToken);
+            SetTokenCookie(authResponse.RefreshToken);
 
-            return Ok(response);
+            return Ok(authResponse);
         }
+
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest model)
         {
-            var response = _authService.Register(model, ipAddress());
+            AuthResponse authResponse = _authService.Register(model, IpAddress());
 
-            setTokenCookie(response.RefreshToken);
+            SetTokenCookie(authResponse.RefreshToken);
 
-            return Ok(response);
+            return Ok(authResponse);
         }
 
         [HttpPost("refresh-token")]
         public IActionResult RefreshToken()
         {
-            var refreshToken = Request.Cookies["refreshToken"];
-            var response = _authService.RefreshToken(refreshToken, ipAddress());
+            string refreshToken = Request.Cookies["refreshToken"];
 
-            if (response == null)
-                return Unauthorized(new { message = "Invalid token" });
+            RefreshResponse authResponse = _authService.RefreshToken(refreshToken, IpAddress());
 
-            setTokenCookie(response.RefreshToken);
+            if (authResponse == null)
+            {
+                return Unauthorized("Invalid token");
+            }
 
-            return Ok(response);
+            SetTokenCookie(authResponse.RefreshToken);
+
+            return Ok(authResponse);
         }
 
         [Authorize]
         [HttpPost("revoke-token")]
-
         public IActionResult RevokeToken()
         {
-            //Accept token from request body or cookie
+            string token = Request.Cookies["refreshToken"];
 
-            var token = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(token))
-                return BadRequest(new { message = "Token is required" });
+            {
+                return BadRequest("Token is required");
+            }
 
-            var response = _authService.RevokeToken(token, ipAddress());
+            var revokedResponse = _authService.RevokeToken(token, IpAddress());
 
-            if (!response)
-                return NotFound(new { message = "Token not found" });
+            if (!revokedResponse)
+            {
+                return NotFound("Token not found");
+            }
 
             Response.Cookies.Delete("refreshToken");
 
-            return Ok(new { message = "Token revoked" });
-        }
-        [Authorize]
-        [HttpGet("refresh-tokens")]
-        public IActionResult GetRefreshTokens()
-        {
-            int userId = int.Parse(getUserId());
-            var refreshTokens = _authService.GetUserRefreshTokens(userId);
-
-            if (refreshTokens == null) return NotFound();
-
-            return Ok(refreshTokens);
+            return Ok("Token revoked");
         }
 
-        //helper methods
+        #region Private methods
 
-        private void setTokenCookie(string token)
+        private void SetTokenCookie(string token)
         {
             var cookieOptions = new CookieOptions
             {
@@ -101,18 +95,14 @@ namespace TwetterApi.Controllers
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
-
-        public string getUserId()
-        {
-           return User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        }
-
-        private string ipAddress()
+        private string IpAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
                 return Request.Headers["X-Forwarded-For"];
             else
                 return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
+
+        #endregion
     }
 }

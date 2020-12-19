@@ -1,25 +1,17 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TwetterApi.Models.Options;
-using TwetterApi.Models.DBContext;
-using TwetterApi.Models.Repositories;
-using TwetterApi.Services;
+using TwetterApi.Domain.Options;
+using TwetterApi.Infrastructure.IoC;
 
-namespace TwetterApi
+namespace TwetterApi.Web
 {
     public class Startup
     {
@@ -30,7 +22,14 @@ namespace TwetterApi
 
         public IConfiguration Configuration { get; }
 
+
+        private static void RegisterServices(IServiceCollection services)
+        {
+            DependencyContainer.RegisterServices(services);
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -41,21 +40,14 @@ namespace TwetterApi
             });
 
             //Secrets
-            services.Configure<DBOptions>(Configuration.GetSection(DBOptions.DB));
-            var tokenOptionsSection = Configuration.GetSection(TokenOptions.Token);
-            services.Configure<TokenOptions>(tokenOptionsSection);
+            services.Configure<DbOptions>(Configuration.GetSection(DbOptions.Db));
+            services.Configure<TokenOptions>(Configuration.GetSection(TokenOptions.Token));
 
-            // Dependecy Injection
-
-            services.AddScoped<IDbContext, TweeterContext>();
-            services.AddScoped<ITweetRepository, TweetRepository>();
-            services.AddScoped<IUserRepository,UserRepository>();
-            services.AddScoped<ITokenRepository, TokenRepository>();
-            services.AddScoped<ITweetService, TweetService>();
-            services.AddScoped<IAuthService, AuthService>();
+            //Dependency Injection
+            RegisterServices(services);
 
             //Configure jwt authentication
-
+            var tokenOptionsSection = Configuration.GetSection(TokenOptions.Token);
             var tokenOptions = tokenOptionsSection.Get<TokenOptions>();
             var key = Encoding.ASCII.GetBytes(tokenOptions.JwtTokenSecret);
 

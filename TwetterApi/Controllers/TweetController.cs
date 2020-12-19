@@ -1,11 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TwetterApi.Models.Response;
-using TwetterApi.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using TwetterApi.Application.TweetService;
 
 namespace TwetterApi.Controllers
 {

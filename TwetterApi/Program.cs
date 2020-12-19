@@ -6,8 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TwetterApi.Web;
 
-namespace TwetterApi
+namespace TwetterApi.Web
 {
     public class Program
     {

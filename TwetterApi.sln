@@ -3,7 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi", "TwetterApi\TwetterApi.csproj", "{D0643158-D535-4E71-86F5-8ADE4EA4E592}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Web", "TwetterApi\TwetterApi.Web.csproj", "{D0643158-D535-4E71-86F5-8ADE4EA4E592}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58} = {6107CA3F-AE72-4ACC-B05C-9861F668CF58}
+		{8C781540-A1DA-4838-9F32-CAEE879A315E} = {8C781540-A1DA-4838-9F32-CAEE879A315E}
+		{28CA514C-A06D-4455-87D5-DBDED38472B5} = {28CA514C-A06D-4455-87D5-DBDED38472B5}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.DataAccess", "DataAccess\TwetterApi.DataAccess.csproj", "{8C781540-A1DA-4838-9F32-CAEE879A315E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58} = {6107CA3F-AE72-4ACC-B05C-9861F668CF58}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Application", "AplicationCore\TwetterApi.Application.csproj", "{28CA514C-A06D-4455-87D5-DBDED38472B5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58} = {6107CA3F-AE72-4ACC-B05C-9861F668CF58}
+		{8C781540-A1DA-4838-9F32-CAEE879A315E} = {8C781540-A1DA-4838-9F32-CAEE879A315E}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Domain", "Infrastructure\TwetterApi.Domain.csproj", "{6107CA3F-AE72-4ACC-B05C-9861F668CF58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwetterApi.Infrastructure.IoC", "TwetterApi.Infrastructure.IoC\TwetterApi.Infrastructure.IoC.csproj", "{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +35,22 @@ Global
 		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C781540-A1DA-4838-9F32-CAEE879A315E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C781540-A1DA-4838-9F32-CAEE879A315E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C781540-A1DA-4838-9F32-CAEE879A315E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C781540-A1DA-4838-9F32-CAEE879A315E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28CA514C-A06D-4455-87D5-DBDED38472B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28CA514C-A06D-4455-87D5-DBDED38472B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28CA514C-A06D-4455-87D5-DBDED38472B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28CA514C-A06D-4455-87D5-DBDED38472B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6107CA3F-AE72-4ACC-B05C-9861F668CF58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
