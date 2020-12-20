@@ -15,6 +15,9 @@
     <ProjectReference Include="..\AplicationCore\TwetterApi.Application.csproj" />
     <ProjectReference Include="..\DataAccess\TwetterApi.DataAccess.csproj" />
     <ProjectReference Include="..\Infrastructure\TwetterApi.Domain.csproj" />
+    <ProjectReference Include="..\TwetterApi.Aplication\TwetterApi.Application.csproj" />
+    <ProjectReference Include="..\TwetterApi.DataAccess\TwetterApi.DataAccess.csproj" />
+    <ProjectReference Include="..\TwetterApi.Domain\TwetterApi.Domain.csproj" />
   </ItemGroup>
 
 </Project>

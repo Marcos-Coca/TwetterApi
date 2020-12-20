@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Configuration;
 using System.Text;
 using TwetterApi.Domain.Options;
 using TwetterApi.Infrastructure.IoC;
@@ -21,13 +22,7 @@ namespace TwetterApi.Web
         }
 
         public IConfiguration Configuration { get; }
-
-
-        private static void RegisterServices(IServiceCollection services)
-        {
-            DependencyContainer.RegisterServices(services);
-        }
-
+       
         // This method gets called by the runtime. Use this method to add services to the container.
 
         public void ConfigureServices(IServiceCollection services)
@@ -40,14 +35,20 @@ namespace TwetterApi.Web
             });
 
             //Secrets
-            services.Configure<DbOptions>(Configuration.GetSection(DbOptions.Db));
-            services.Configure<TokenOptions>(Configuration.GetSection(TokenOptions.Token));
+            var dbOptionsSection = Configuration.GetSection(DbOptions.Db);
+            var tokenOptionsSection = Configuration.GetSection(TokenOptions.Token);
 
+            services.Configure<DbOptions>(dbOptionsSection);
+            services.Configure<TokenOptions>(tokenOptionsSection);
+
+            //Set Connection String
+            SetConnectionString(dbOptionsSection);
+            
             //Dependency Injection
             RegisterServices(services);
 
+
             //Configure jwt authentication
-            var tokenOptionsSection = Configuration.GetSection(TokenOptions.Token);
             var tokenOptions = tokenOptionsSection.Get<TokenOptions>();
             var key = Encoding.ASCII.GetBytes(tokenOptions.JwtTokenSecret);
 
@@ -71,7 +72,21 @@ namespace TwetterApi.Web
                     };
                 });
         }
+        private static void RegisterServices(IServiceCollection services)
+        {
+            DependencyContainer.RegisterServices(services);
+        }
 
+        private static void SetConnectionString(IConfigurationSection dbSection)
+        {
+            string connectionString = dbSection.Get<DbOptions>().ConnectionString;
+
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var csSection = config.ConnectionStrings;
+
+            csSection.ConnectionStrings.Add(new ConnectionStringSettings(DbOptions.Db, connectionString));
+            config.Save(ConfigurationSaveMode.Modified);
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

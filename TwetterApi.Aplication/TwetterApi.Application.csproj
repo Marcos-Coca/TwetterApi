@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\TwetterApi.Domain.csproj" />
+    <ProjectReference Include="..\TwetterApi.Domain\TwetterApi.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -24,7 +24,7 @@ namespace TwetterApi.DataAccess
         {
             get
             {
-                var dbOptionsSection = (DbOptions)ConfigurationManager.GetSection(DbOptions.Db);
+                var dbOptionsSection = ConfigurationManager.ConnectionStrings[DbOptions.Db];
                 return dbOptionsSection.ConnectionString;
             }
         }
