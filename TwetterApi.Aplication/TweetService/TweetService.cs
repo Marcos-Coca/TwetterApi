@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using TwetterApi.Domain.Entities;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.DTOs;
 using TwetterApi.Domain.Models.Response;
+using TwetterApi.Domain.Interfaces.Repositories;
+
 
 
 namespace TwetterApi.Application.TweetService
@@ -19,14 +20,14 @@ namespace TwetterApi.Application.TweetService
 
         public TweetReponse GetTweet(int id)
         {
-            Tweet tweet = _tweetRepository.GetTweet(id);
+            TweetDTO tweet = _tweetRepository.GetTweet(id);
             if (tweet == null) return null;
             return new TweetReponse(tweet);
         }
 
         public List<TweetReponse> GetTweets()
         {
-            List<Tweet> tweets = _tweetRepository.GetTweets();
+            List<TweetDTO> tweets = _tweetRepository.GetTweets();
            return (List<TweetReponse>)tweets.Select(tweet => new TweetReponse(tweet));
         }
     }

@@ -4,8 +4,9 @@ using System.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using TwetterApi.Domain.Options;
-using TwetterApi.Domain.Entities;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.DTOs;
+using TwetterApi.Domain.Interfaces.Mappers;
+using TwetterApi.Domain.Interfaces.Repositories;
 using TwetterApi.Domain.Models.Request;
 using TwetterApi.Domain.Models.Response;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,26 +17,31 @@ namespace TwetterApi.Application.AuthService
 {
     public class AuthService : IAuthService
     {
+        private readonly IUserMapper _userMapper;
         private readonly TokenOptions _tokenOptions;
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-        public AuthService(IUserRepository userRepository,
+        public AuthService(
+            IUserMapper userMapper,
+            IUserRepository userRepository,
             IOptions<TokenOptions> tokenOptions,
-            IRefreshTokenRepository refreshTokenRepository)
+            IRefreshTokenRepository refreshTokenRepository
+            )
         {
+            _userMapper = userMapper;
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
             _tokenOptions = tokenOptions.Value;
         }
         public AuthResponse Login(LoginRequest model, string ipAddress)
         {
-            User user = _userRepository.GetUserByEmail(model.Email);
+            UserDTO user = _userRepository.GetUserByEmail(model.Email);
 
             if (user == null || !BC.Verify(model.Password, user.Password))
                 return null;
 
-            var jwtToken = GenerateJwtToken(user.Id);
+            string jwtToken = GenerateJwtToken(user.Id);
             var refreshToken = GenerateRefreshToken(ipAddress, user.Id);
 
             _refreshTokenRepository.SaveRefreshToken(refreshToken);
@@ -45,7 +51,7 @@ namespace TwetterApi.Application.AuthService
 
         public RefreshResponse RefreshToken(string token, string ipAddress)
         {
-            RefreshToken refreshToken = _refreshTokenRepository.GetRefreshToken(token);
+            RefreshTokenDTO refreshToken = _refreshTokenRepository.GetRefreshToken(token);
 
             if (refreshToken == null) return null;
 
@@ -67,14 +73,7 @@ namespace TwetterApi.Application.AuthService
 
         public AuthResponse Register(RegisterRequest model, string ipAddress)
         {
-            User user = new User()
-            {
-                Name = model.Name,
-                UserName = model.UserName,
-                Email = model.Email,
-                BirthDate = model.BirthDate,
-                Password = BC.HashPassword(model.Password),
-            };
+            UserDTO user = _userMapper.Map(model);
 
             _userRepository.CreateUser(user);
             var createdUser = _userRepository.GetUserByEmail(user.Email);
@@ -89,7 +88,7 @@ namespace TwetterApi.Application.AuthService
 
         public bool RevokeToken(string token, string ipAddress)
         {
-            RefreshToken refreshToken = _refreshTokenRepository.GetRefreshToken(token);
+            RefreshTokenDTO refreshToken = _refreshTokenRepository.GetRefreshToken(token);
 
             if (refreshToken == null) return false;
 
@@ -122,12 +121,12 @@ namespace TwetterApi.Application.AuthService
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-        private static RefreshToken GenerateRefreshToken(string ipAddress, int userId)
+        private static RefreshTokenDTO GenerateRefreshToken(string ipAddress, int userId)
         {
             using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[64];
             rngCryptoServiceProvider.GetBytes(randomBytes);
-            return new RefreshToken
+            return new RefreshTokenDTO
             {
                 Token = Convert.ToBase64String(randomBytes),
                 Expires = DateTime.UtcNow.AddDays(7),

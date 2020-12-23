@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.Interfaces.Repositories;
 
 namespace TwetterApi.Domain.Models.Request
 {

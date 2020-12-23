@@ -29,6 +29,7 @@ namespace TwetterApi.Controllers
             }
 
             SetTokenCookie(authResponse.RefreshToken);
+            authResponse.RefreshToken = null;
 
             return Ok(authResponse);
         }
@@ -39,6 +40,7 @@ namespace TwetterApi.Controllers
             AuthResponse authResponse = _authService.Register(model, IpAddress());
 
             SetTokenCookie(authResponse.RefreshToken);
+            authResponse.RefreshToken = null;
 
             return Ok(authResponse);
         }
@@ -48,16 +50,16 @@ namespace TwetterApi.Controllers
         {
             string refreshToken = Request.Cookies["refreshToken"];
 
-            RefreshResponse authResponse = _authService.RefreshToken(refreshToken, IpAddress());
+            RefreshResponse refreshResponse = _authService.RefreshToken(refreshToken, IpAddress());
 
-            if (authResponse == null)
+            if (refreshResponse == null)
             {
                 return Unauthorized("Invalid token");
             }
 
-            SetTokenCookie(authResponse.RefreshToken);
+            SetTokenCookie(refreshResponse.RefreshToken);
 
-            return Ok(authResponse);
+            return Ok(refreshResponse);
         }
 
         [Authorize]

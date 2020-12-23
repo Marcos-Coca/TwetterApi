@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Mappers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
@@ -18,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\TwetterApi.Domain.csproj" />
     <ProjectReference Include="..\TwetterApi.Domain\TwetterApi.Domain.csproj" />
+    <ProjectReference Include="..\TwetterApi.Mapper\TwetterApi.Mapper.csproj" />
   </ItemGroup>
 
 </Project>

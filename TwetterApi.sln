@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Application", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Domain", "TwetterApi.Domain\TwetterApi.Domain.csproj", "{6107CA3F-AE72-4ACC-B05C-9861F668CF58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwetterApi.Infrastructure.IoC", "TwetterApi.Infrastructure.IoC\TwetterApi.Infrastructure.IoC.csproj", "{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Infrastructure.IoC", "TwetterApi.Infrastructure.IoC\TwetterApi.Infrastructure.IoC.csproj", "{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwetterApi.Mapper", "TwetterApi.Mapper\TwetterApi.Mapper.csproj", "{243C300F-41B4-4E05-8C79-A4434D7B2A59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,8 +33,8 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0643158-D535-4E71-86F5-8ADE4EA4E592}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8C781540-A1DA-4838-9F32-CAEE879A315E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B6B6B16-0E5E-4797-9DC1-1535D7A0836E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243C300F-41B4-4E05-8C79-A4434D7B2A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243C300F-41B4-4E05-8C79-A4434D7B2A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243C300F-41B4-4E05-8C79-A4434D7B2A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243C300F-41B4-4E05-8C79-A4434D7B2A59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

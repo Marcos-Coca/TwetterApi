@@ -13,12 +13,17 @@ namespace TwetterApi.DataAccess
         
         internal static bool IsDBNull(object value)
         {
-            if (value == System.DBNull.Value || value == null)
+            if (value == DBNull.Value || value == null)
             {
                 return true;
             }
             return false;
 
+        }
+
+        internal static object DbNullIfNull(object value)
+        {
+            return value ?? DBNull.Value;
         }
         private static string ConnnectionString
         {

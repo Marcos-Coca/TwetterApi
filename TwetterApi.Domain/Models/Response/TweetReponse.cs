@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TwetterApi.Domain.DTOs;
 using TwetterApi.Domain.Entities;
 
 namespace TwetterApi.Domain.Models.Response
@@ -15,7 +16,7 @@ namespace TwetterApi.Domain.Models.Response
         public List<string> PhotosUrl { get; set; }
         public TweetUserResponse User { get; set; }
 
-        public TweetReponse(Tweet tweet)
+        public TweetReponse(TweetDTO tweet)
         {
             Id = tweet.Id;
             Content = tweet.Content;
@@ -35,7 +36,7 @@ namespace TwetterApi.Domain.Models.Response
         public string UserName { get; set; }
         public string PhotoUrl { get; set; }
 
-        public TweetUserResponse(Tweet tweet)
+        public TweetUserResponse(TweetDTO tweet)
         {
             Id = tweet.UserId;
             Name = tweet.Name;

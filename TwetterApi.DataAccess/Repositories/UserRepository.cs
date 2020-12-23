@@ -1,16 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using TwetterApi.Domain;
-using TwetterApi.Domain.Entities;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.DTOs;
+using TwetterApi.Domain.Interfaces.Mappers;
+using TwetterApi.Domain.Interfaces.Repositories;
+
 
 
 namespace TwetterApi.DataAccess.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public void CreateUser(User user)
+        private readonly IUserMapper _userMapper;
+        public UserRepository(IUserMapper userMapper)
+        {
+            _userMapper = userMapper;
+        }
+        public void CreateUser(UserDTO user)
         {
             using var connection = Common.GetConnection();
             using var command = SQL_CREATE_USER(user);
@@ -21,13 +26,13 @@ namespace TwetterApi.DataAccess.Repositories
             command.ExecuteNonQuery();
             connection.Close();
         }
-        public User GetUser(int id)
+        public UserDTO GetUser(int id)
         {
             throw new NotImplementedException();
         }
-        public User GetUserByEmail(string email)
+        public UserDTO GetUserByEmail(string email)
         {
-            User user = null;
+            UserDTO user = null;
 
             using var connection = Common.GetConnection();
             using var command = SQL_GET_USER_BY_EMAIL(email);
@@ -39,15 +44,14 @@ namespace TwetterApi.DataAccess.Repositories
 
             while (reader.Read())
             {
-                user = ReadUser(reader);
+                user = _userMapper.Map(reader);
             }
             connection.Close();
             return user;
         }
-
-        public User GetUserByUserName(string userName)
+        public UserDTO GetUserByUserName(string userName)
         {
-            User user = null;
+            UserDTO user = null;
 
             using var connection = Common.GetConnection();
             using var command = SQL_GET_USER_BY_USERNAME(userName);
@@ -60,7 +64,7 @@ namespace TwetterApi.DataAccess.Repositories
 
             while(reader.Read())
             {
-                user = ReadUser(reader);
+                user = _userMapper.Map(reader);
             }
 
             connection.Close();
@@ -71,7 +75,7 @@ namespace TwetterApi.DataAccess.Repositories
         #region Private methods
 
         #region SQL commands
-        private static SqlCommand SQL_CREATE_USER(User user)
+        private static SqlCommand SQL_CREATE_USER(UserDTO user)
         {
             string query = "INSERT INTO [user] ([name],[user_name],[email],[birth_date],[password])" +
                 " Values(@name,@user_name,@email,@birth_date,@password)";
@@ -94,7 +98,6 @@ namespace TwetterApi.DataAccess.Repositories
 
             return command;
         }
-
         private static SqlCommand SQL_GET_USER_BY_USERNAME(string userName)
         {
             string query = "SELECT * FROM [user] WHERE user_name = @userName";
@@ -105,18 +108,6 @@ namespace TwetterApi.DataAccess.Repositories
             return command;
         }
         #endregion
-        private static User ReadUser(SqlDataReader reader) => new User
-        {
-            Id = Convert.ToInt32(reader["id"]),
-            Name = Convert.ToString(reader["name"]),
-            UserName = Convert.ToString(reader["user_name"]),
-            Email = Convert.ToString(reader["email"]),
-            Password = Convert.ToString(reader["password"]),
-            BirthDate = Convert.ToDateTime(reader["birth_date"]),
-            PhotoUrl = Common.IsDBNull(reader["photo_url"]) ? string.Empty : Convert.ToString(reader["photo_url"]),
-            Biography = Common.IsDBNull(reader["biography"]) ? string.Empty : Convert.ToString(reader["biography"]),
-            HeaderUrl = Common.IsDBNull(reader["header_url"]) ? string.Empty : Convert.ToString(reader["header_url"]),
-        };
         #endregion
 
     }

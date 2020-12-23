@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
-using TwetterApi.Domain.Entities;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.DTOs;
+using TwetterApi.Domain.Interfaces.Mappers;
+using TwetterApi.Domain.Interfaces.Repositories;
 
 
 
@@ -12,10 +11,16 @@ namespace TwetterApi.DataAccess.Repositories
 {
     public class TweetRepository : ITweetRepository
     {
-        
-        public Tweet GetTweet(int id)
+        private readonly ITweetMapper _tweetMapper;
+        public TweetRepository(ITweetMapper tweetMapper)
         {
-            Tweet tweet = null;
+            _tweetMapper = tweetMapper;
+        }
+            
+
+        public TweetDTO GetTweet(int id)
+        {
+            TweetDTO tweet = null;
 
             using var connection = Common.GetConnection();
             using var command = SQL_GET_TWEET(id);
@@ -27,7 +32,7 @@ namespace TwetterApi.DataAccess.Repositories
 
             while (reader.Read())
             {
-                tweet = ReadTweet(reader);
+                tweet = _tweetMapper.Map(reader);
 
                 if (tweet.Media == Media.Yes)
                     tweet.PhotosUrl = GetTweetPhotos(tweet.Id);
@@ -38,25 +43,25 @@ namespace TwetterApi.DataAccess.Repositories
             return tweet;
         }
 
-        public List<Tweet> GetTweets()
+        public List<TweetDTO> GetTweets()
         {
             throw new NotImplementedException();
         }
-        public List<Tweet> GetUserAllTweets()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Tweet> GetUserPublicsTweets()
+        public List<TweetDTO> GetUserAllTweets()
         {
             throw new NotImplementedException();
         }
 
-        public List<Tweet> GetUserPostTweets()
+        public List<TweetDTO> GetUserPublicsTweets()
         {
             throw new NotImplementedException();
         }
-        public List<Tweet> GetUserTweets()
+
+        public List<TweetDTO> GetUserPostTweets()
+        {
+            throw new NotImplementedException();
+        }
+        public List<TweetDTO> GetUserTweets()
         {
             throw new NotImplementedException();
         }
@@ -109,24 +114,6 @@ namespace TwetterApi.DataAccess.Repositories
 
             return photosUrls;
         }
-
-        private static Tweet ReadTweet(SqlDataReader reader) => new Tweet
-        {
-            Id = (int)(reader["id"]),
-            Media = (Media)Convert.ToInt32(reader["media"]),
-            Visibitity = (Visibility)Convert.ToInt32(reader["visibility"]),
-            Type = (Domain.Entities.Type)Convert.ToInt32(reader["type"]),
-            CreatedAt = (DateTime)reader["created_at"],
-            UpdatedAt = (DateTime)reader["updated_at"],
-            PhotosUrl = new List<string>(),
-            UserId = (int)reader["user_id"],
-            Name = (string)reader["name"],
-            UserName = (string)reader["user_name"],
-            Content = Common.IsDBNull(reader["content"]) ? string.Empty : (string)reader["content"],
-            PhotoUrl = Common.IsDBNull(reader["photo_url"]) ? string.Empty : (string)reader["photo_url"],
-        };
-
-
         #endregion
     }
 }

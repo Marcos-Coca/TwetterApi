@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Data.SqlClient;
-using TwetterApi.DataAccess;
-using TwetterApi.Domain.Entities;
-using TwetterApi.Domain.Repositories;
+using TwetterApi.Domain.DTOs;
+using TwetterApi.Domain.Interfaces.Mappers;
+using TwetterApi.Domain.Interfaces.Repositories;
+
 
 namespace TwetterApi.DataAccess.Repositories
 {
     public class RefreshTokenRepository : IRefreshTokenRepository
     {
-        public RefreshToken GetRefreshToken(string token)
+        private readonly IRefreshTokenMapper _refreshTokenMapper;
+        public RefreshTokenRepository(IRefreshTokenMapper refreshTokenMapper)
+        {
+            _refreshTokenMapper = refreshTokenMapper;
+        }
+        public RefreshTokenDTO GetRefreshToken(string token)
         {
 
-            RefreshToken refreshToken = null;
+            RefreshTokenDTO refreshToken = null;
 
             using var connection = Common.GetConnection();
             using var command = SQL_GET_REFRESHTOKEN(token);
@@ -23,13 +29,13 @@ namespace TwetterApi.DataAccess.Repositories
 
             while (reader.Read())
             {
-                refreshToken = ReadRefreshToken(reader);
+                refreshToken = _refreshTokenMapper.Map(reader);
             }
             connection.Close();
 
             return refreshToken;
         }
-        public void SaveRefreshToken(RefreshToken token)
+        public void SaveRefreshToken(RefreshTokenDTO token)
         {
 
             using var connection = Common.GetConnection();
@@ -41,7 +47,7 @@ namespace TwetterApi.DataAccess.Repositories
             command.ExecuteNonQuery();
             connection.Close();
         }
-        public void UpdateRefreshToken(RefreshToken token)
+        public void UpdateRefreshToken(RefreshTokenDTO token)
         {
             using var connection = Common.GetConnection();
             using var command = SQL_UPDATE_REFRESHTOKEN(token);
@@ -53,7 +59,6 @@ namespace TwetterApi.DataAccess.Repositories
             connection.Close();
         }
 
-        #region Private methods
 
         #region SQL commands
         private static SqlCommand SQL_GET_REFRESHTOKEN(string token)
@@ -68,7 +73,7 @@ namespace TwetterApi.DataAccess.Repositories
             return command;
 
         }
-        private static SqlCommand SQL_SAVE_REFRESHTOKEN(RefreshToken token)
+        private static SqlCommand SQL_SAVE_REFRESHTOKEN(RefreshTokenDTO token)
         {
 
             string query = "INSERT INTO refresh_token ([token],[expires]" +
@@ -85,7 +90,7 @@ namespace TwetterApi.DataAccess.Repositories
             return command;
 
         }
-        private static SqlCommand SQL_UPDATE_REFRESHTOKEN(RefreshToken token)
+        private static SqlCommand SQL_UPDATE_REFRESHTOKEN(RefreshTokenDTO token)
         {
             string query = "UPDATE refresh_token SET revoked=@revoked, " +
                 "revoked_by_ip=@revoked_by_ip, replaced_by_token=@replaced_by_token " +
@@ -93,27 +98,16 @@ namespace TwetterApi.DataAccess.Repositories
 
 
             var command = new SqlCommand(query);
+            command.Parameters.AddWithValue("@token", token.Token);
             command.Parameters.AddWithValue("@revoked", token.Revoked);
             command.Parameters.AddWithValue("@revoked_by_ip", token.RevokedByIp);
-            command.Parameters.AddWithValue("@replaced_by_token", "").Value = token.ReplacedByToken ?? (object)DBNull.Value;
-            command.Parameters.AddWithValue("@token", token.Token);
+            command.Parameters.AddWithValue("@replaced_by_token", Common.DbNullIfNull(token.ReplacedByToken));
+
 
             return command;
 
         }
         #endregion
-        private static RefreshToken ReadRefreshToken(SqlDataReader reader) => new RefreshToken
-        {
-            Id = Convert.ToInt32(reader["id"]),
-            Token = Convert.ToString(reader["token"]),
-            CreatedAt = Convert.ToDateTime(reader["created_at"]),
-            CreatedByIp = Convert.ToString(reader["created_by_ip"]),
-            Expires = Convert.ToDateTime(reader["expires"]),
-            UserId = Convert.ToInt32(reader["user_id"]),
-            Revoked = Common.IsDBNull(reader["revoked"]) ? null : Convert.ToDateTime(reader["revoked"]),
-            RevokedByIp = Common.IsDBNull(reader["revoked_by_ip"]) ? null : Convert.ToString(reader["revoked_by_ip"]),
-            ReplacedByToken = Common.IsDBNull(reader["replaced_by_token"]) ? null : Convert.ToString(reader["replaced_by_token"]),
-        };
-        #endregion
+
     }
 }
